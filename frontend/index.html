@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSnap Complaints</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>EcoSnap - Report a Complaint</h1>
+        <form id="complaintForm">
+            <input type="text" id="user" placeholder="Your Name" required>
+            <textarea id="description" placeholder="Description" required></textarea>
+            <input type="file" id="image" accept="image/*">
+            <input type="text" id="lat" placeholder="Latitude" required>
+            <input type="text" id="lng" placeholder="Longitude" required>
+            <button type="submit">Submit Complaint</button>
+        </form>
+        <h2>Complaints</h2>
+        <div id="complaintsList"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

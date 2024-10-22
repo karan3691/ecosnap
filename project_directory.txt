@@ -1,0 +1,16 @@
+ecosnap/
+│
+├── backend/
+│   ├── uploads/                   # Directory for uploaded images
+│   ├── models/
+│   │   └── complaint.js           # Complaint model
+│   ├── routes/
+│   │   └── complaintRoutes.js      # Routes for complaints
+│   ├── .env                       # Environment variables (optional)
+│   ├── server.js                  # Main server file
+│   └── package.json               # NPM package file
+│
+└── frontend/
+    ├── index.html                 # Main HTML file
+    ├── style.css                  # CSS file
+    └── script.js                  # JavaScript file
