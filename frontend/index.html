@@ -1,25 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSnap Complaints</title>
+    <title>EcoSnap - Complaints</title>
+    <!-- Link to your CSS file -->
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1>EcoSnap - Report a Complaint</h1>
+    <!-- Header or Navbar -->
+    <header>
+        <h1>Welcome to EcoSnap</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Complaint Form -->
+    <section id="complaintSection">
+        <h2>Submit a Complaint</h2>
         <form id="complaintForm">
-            <input type="text" id="user" placeholder="Your Name" required>
-            <textarea id="description" placeholder="Description" required></textarea>
-            <input type="file" id="image" accept="image/*">
-            <input type="text" id="lat" placeholder="Latitude" required>
-            <input type="text" id="lng" placeholder="Longitude" required>
+            <label for="user">Username:</label>
+            <input type="text" id="user" name="user" required>
+            
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea>
+            
+            <label for="lat">Latitude:</label>
+            <input type="text" id="lat" name="lat" required>
+            
+            <label for="lng">Longitude:</label>
+            <input type="text" id="lng" name="lng" required>
+            
+            <label for="image">Image:</label>
+            <input type="file" id="image" name="image">
+            
             <button type="submit">Submit Complaint</button>
         </form>
-        <h2>Complaints</h2>
+    </section>
+
+    <!-- Complaints List -->
+    <section id="complaintsSection">
+        <h2>Recent Complaints</h2>
         <div id="complaintsList"></div>
-    </div>
+    </section>
+
+    <!-- Link to your JS file -->
     <script src="script.js"></script>
 </body>
+
 </html>

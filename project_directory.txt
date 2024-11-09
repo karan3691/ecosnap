@@ -1,16 +1,25 @@
-ecosnap/
+/ecosnap
 │
-├── backend/
-│   ├── uploads/                   # Directory for uploaded images
-│   ├── models/
-│   │   └── complaint.js           # Complaint model
-│   ├── routes/
-│   │   └── complaintRoutes.js      # Routes for complaints
-│   ├── .env                       # Environment variables (optional)
-│   ├── server.js                  # Main server file
-│   └── package.json               # NPM package file
+├── /backend                       # Backend code (Express.js)
+│   ├── /uploads                   # Directory for uploaded images (for complaints)
+│   ├── /models                    # Mongoose models
+│   │   ├── complaint.js           # Complaint model
+│   │   └── user.js                # User model (for authentication)
+│   ├── /routes                    # API routes
+│   │   ├── authRoutes.js          # Routes for user authentication (register, login)
+│   │   └── complaintRoutes.js     # Routes for complaints (CRUD operations)
+│   ├── .env                       # Environment variables (MongoDB URI, JWT_SECRET, etc.)
+│   ├── server.js                  # Main server file to set up Express and MongoDB connection
+│   ├── package.json               # Backend dependencies and scripts
+│   └── /middleware                # Optional middleware (e.g., authentication middleware)
 │
-└── frontend/
-    ├── index.html                 # Main HTML file
-    ├── style.css                  # CSS file
-    └── script.js                  # JavaScript file
+└── /frontend                      # Frontend code (HTML, CSS, JavaScript)
+    ├── index.html                 # Main HTML page with register and login forms
+    ├── dashboard.html             # Dashboard page after user login (view complaints)
+    ├── style.css                  # Styles for frontend pages (forms, buttons, etc.)
+    ├── script.js                  # JavaScript for handling forms, API requests, and token management
+    └── /images                    # Folder for any image assets
+
+
+/Users/karansahota/mongodb-macos-aarch64-8.0.1/bin/mongo
+ sudo mongod --dbpath=/Users/karansahota/data/db
