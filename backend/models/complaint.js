@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const complaintSchema = new mongoose.Schema({
     user: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     description: {
@@ -11,7 +12,7 @@ const complaintSchema = new mongoose.Schema({
     },
     imageUrl: {
         type: String,
-        required: false, // Optional field
+        required: false,
     },
     location: {
         lat: {
@@ -23,8 +24,6 @@ const complaintSchema = new mongoose.Schema({
             required: true,
         },
     },
-}, { timestamps: true });
+});
 
-const Complaint = mongoose.model('Complaint', complaintSchema);
-
-module.exports = Complaint;
+module.exports = mongoose.model('Complaint', complaintSchema);

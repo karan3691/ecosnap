@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const User = require('./models/user'); // Import User model
+const complaintRoutes = require('./routes/complaintRoutes'); // Import Complaint Routes
 
 // Load environment variables
 dotenv.config();
@@ -14,30 +15,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json()); // Using express built-in JSON parser
 
-// Test route to compare password (for debugging)
-app.post('/test-password', async (req, res) => {
-    const { username, password } = req.body;
-
-    try {
-        // Find user by username
-        const user = await User.findOne({ username });
-
-        // If the user does not exist, send a 400 response
-        if (!user) {
-            return res.status(400).json({ message: 'User not found' });
-        }
-
-        // Compare the provided password with the stored hashed password
-        const isMatch = await user.comparePassword(password);
-
-        // Respond with the result of password comparison
-        res.status(200).json({ match: isMatch });
-    } catch (error) {
-        // Catch and send any errors
-        res.status(500).json({ message: 'Error during password comparison', error: error.message });
-    }
-});
-
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
@@ -46,6 +23,9 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 // Import authentication routes
 const authRoutes = require('./routes/authRoutes'); // Make sure this path is correct
 app.use('/api/auth', authRoutes); // Use routes defined in authRoutes.js
+
+// Register complaint routes
+app.use('/api/complaints', complaintRoutes); // Ensure this is registered correctly
 
 // Start the server
 app.listen(port, () => {
