@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Notification Box with Drag-and-Drop Chatbot</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      height: 100vh;
+      background-color: #f4f4f4;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .top-right {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      display: flex;
+      gap: 10px;
+    }
+    .notification-box {
+      position: fixed;
+      top: 70px;
+      right: -350px;
+      background-color: #007BFF;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+      transition: right 0.5s ease;
+      z-index: 1000;
+    }
+    .notification-box.show {
+      right: 20px;
+    }
+    .notification-message {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .close-btn {
+      background: white;
+      border: none;
+      color: #007BFF;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .message-btn {
+      padding: 10px;
+      font-size: 18px;
+      color: white;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+    }
+    .drag-bot {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 60px;
+      height: 60px;
+      background-color: #FFD700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      cursor: grab;
+      transition: transform 0.2s;
+      z-index: 999;
+    }
+    .drag-bot:active {
+      cursor: grabbing;
+      transform: scale(1.1);
+    }
+    .bot-icon {
+      font-size: 24px;
+    }
+    .chat-window {
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      width: 300px;
+      max-height: 400px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1000;
+    }
+    .chat-header {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+    .chat-input button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Notification Button -->
+  <div class="top-right">
+    <button class="message-btn" onclick="showMessageNotification()">
+      <span class="icon">🔔</span>
+    </button>
+  </div>
+
+  <!-- Notification Box -->
+  <div class="notification-box" id="notification">
+    <div class="notification-message" id="message-text">
+      No new messages.
+    </div>
+    <button class="close-btn" onclick="closeNotification()">Close</button>
+  </div>
+
+  <!-- Drag-and-Drop AI Bot -->
+  <div class="drag-bot" id="dragBot" onclick="toggleChatWindow()">
+    <span class="bot-icon">🤖</span>
+  </div>
+
+  <!-- Chat Window -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">AI Chatbot</div>
+    <div class="chat-messages" id="chatMessages">
+      <div><strong>Bot:</strong> Hello! How can I help you today?</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // Show Message Notification
+    function showMessageNotification() {
+      const notification = document.getElementById('notification');
+      const messageText = document.getElementById('message-text');
+
+      notification.classList.add('show');
+
+      setTimeout(() => {
+        const messages = [
+          "You have a new message from John.",
+          "Reminder: Team meeting at 3 PM today.",
+          "New comment on your post.",
+          "Your password will expire in 3 days."
+        ];
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+        messageText.innerText = randomMessage;
+      }, 2000);
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 10000);
+    }
+
+    function closeNotification() {
+      const notification = document.getElementById('notification');
+      notification.classList.remove('show');
+    }
+
+    // Drag-and-Drop Bot
+    const dragBot = document.getElementById('dragBot');
+    let offsetX, offsetY;
+
+    dragBot.addEventListener('mousedown', (e) => {
+      offsetX = e.clientX - dragBot.offsetLeft;
+      offsetY = e.clientY - dragBot.offsetTop;
+      document.addEventListener('mousemove', moveBot);
+      document.addEventListener('mouseup', stopBot);
+    });
+
+    function moveBot(e) {
+      dragBot.style.left = `${e.clientX - offsetX}px`;
+      dragBot.style.top = `${e.clientY - offsetY}px`;
+    }
+
+    function stopBot() {
+      document.removeEventListener('mousemove', moveBot);
+      document.removeEventListener('mouseup', stopBot);
+    }
+
+    // Chatbot Functionality
+    function toggleChatWindow() {
+      const chatWindow = document.getElementById('chatWindow');
+      chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function sendMessage() {
+      const chatInput = document.getElementById('chatInput');
+      const chatMessages = document.getElementById('chatMessages');
+      const userMessage = chatInput.value.trim();
+
+      if (userMessage !== "") {
+        const userChat = `<div><strong>You:</strong> ${userMessage}</div>`;
+        chatMessages.innerHTML += userChat;
+        chatInput.value = "";
+
+        setTimeout(() => {
+          const botResponses = [
+            "I'm here to help!",
+            "Can you clarify that?",
+            "That's interesting!",
+            "Let me think about it...",
+            "Here's a suggestion..."
+          ];
+          const botResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+          const botChat = `<div><strong>Bot:</strong> ${botResponse}</div>`;
+          chatMessages.innerHTML += botChat;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 1000);
+      }
+    }
+  </script>
+
+</body>
+</html>
