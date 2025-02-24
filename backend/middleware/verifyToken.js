@@ -1,24 +1,27 @@
-// middleware/verifyToken.js
-
 const jwt = require('jsonwebtoken');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config();
 
-// Middleware function to verify JWT token
 function verifyToken(req, res, next) {
-    const token = req.headers['authorization']?.split(' ')[1]; // Get token from the Authorization header
-
-    if (!token) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
         return res.status(401).json({ message: 'Access Denied. No token provided.' });
     }
 
+    const [bearer, token] = authHeader.split(' ');
+    if (bearer !== 'Bearer' || !token) {
+        return res.status(401).json({ message: 'Invalid authorization format' });
+    }
+
     try {
-        // Verify token using the JWT_SECRET from .env
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Attach decoded token data to req.user
-        next(); // Proceed to the next middleware or route handler
+        if (decoded.exp * 1000 < Date.now()) {
+            return res.status(401).json({ message: 'Token expired' });
+        }
+        req.user = decoded;
+        next();
     } catch (err) {
         console.error('Token verification failed:', err);
-        res.status(403).json({ message: 'Invalid token.' });
+        res.status(403).json({ message: 'Invalid token' });
     }
 }
 

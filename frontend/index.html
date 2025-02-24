@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSnap - Complaints</title>
+    <title>TrashClick - Complaints</title>
     <style>
         /* Modern CSS Reset */
         * {
@@ -327,6 +326,21 @@
             transform: scale(1.02);
         }
 
+        /* Loading and Error Styles */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: var(--radius-md);
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             main {
@@ -373,12 +387,13 @@
 <body>
     <!-- Header or Navbar -->
     <header>
-        <h1>Welcome to EcoSnap</h1>
+        <h1>Welcome to TrashClick</h1>
         <nav>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="login.html">Login</a></li>
                 <li><a href="register.html">Register</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
             </ul>
         </nav>
     </header>
@@ -416,52 +431,11 @@
         <section id="complaintsSection">
             <h2>Recent Complaints</h2>
             <div id="complaintsList">
-                <!-- Example complaints -->
-                <div class="complaint-item">
-                    <h3>Illegal Waste Dumping</h3>
-                    <div class="complaint-meta">
-                        <span>📍 40.7128° N, 74.0060° W</span>
-                        <span>🕒 2 hours ago</span>
-                    </div>
-                    <p>Large amount of construction waste discovered in protected forest area. Immediate action required.</p>
-                    <img src="/api/placeholder/800/400" alt="Environmental issue photo">
-                </div>
-
-                <div class="complaint-item">
-                    <h3>Water Pollution Report</h3>
-                    <div class="complaint-meta">
-                        <span>📍 40.7589° N, 73.9851° W</span>
-                        <span>🕒 5 hours ago</span>
-                    </div>
-                    <p>Chemical discharge observed in local stream. Water has unusual coloration and odor.</p>
-                    <img src="/api/placeholder/800/400" alt="Water pollution photo">
-                </div>
-
-                <div class="complaint-item">
-                    <h3>Deforestation Alert</h3>
-                    <div class="complaint-meta">
-                        <span>📍 40.7829° N, 73.9654° W</span>
-                        <span>🕒 1 day ago</span>
-                    </div>
-                    <p>Unauthorized clearing of protected trees in progress. Multiple heavy machines on site.</p>
-                    <img src="/api/placeholder/800/400" alt="Deforestation photo">
-                </div>
-
-                <!-- Add more complaint items to test scrolling -->
-                <div class="complaint-item">
-                    <h3>Air Quality Concern</h3>
-                    <div class="complaint-meta">
-                        <span>📍 40.7505° N, 73.9934° W</span>
-                        <span>🕒 2 days ago</span>
-                    </div>
-                    <p>Heavy smoke emission from industrial facility outside of permitted hours.</p>
-                    <img src="/api/placeholder/800/400" alt="Air pollution photo">
-                </div>
+                <div class="loading">Loading complaints...</div>
             </div>
         </section>
     </main>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
-
 </html>

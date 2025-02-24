@@ -23,3 +23,5 @@
 
 /Users/karansahota/mongodb-macos-aarch64-8.0.1/bin/mongo
  sudo mongod --dbpath=/Users/karansahota/data/db
+ sudo mongod --dbpath=/Users/karansahota/data/db
+ 

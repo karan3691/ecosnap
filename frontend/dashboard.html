@@ -1,10 +1,198 @@
-#user profile
-# user progress
-# user settings
-# user logout
-# user login
-# user register
-# user forgot password
-# user reset password
-# # automation bot
-# telegram bot
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EcoSnap</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --error: #e74c3c;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --text-dark: #2c3e50;
+            --text-light: #636e72;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px var(--shadow);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: var(--text-dark);
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--primary);
+            margin: 0.5rem auto 0;
+            border-radius: 2px;
+        }
+
+        h2 {
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .profile-info p, .rewards p, .status-summary p {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .status-summary .stats {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-summary .stat {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #edf2f7;
+            flex: 1;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .status-summary .stat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .logout-btn {
+            background: var(--error);
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.25rem;
+            }
+
+            .status-summary .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard</h1>
+
+        <!-- User Profile -->
+        <div class="section profile-info">
+            <h2 id="userGreeting">Loading...</h2>
+            <p>Member since: <span id="joinDate">Loading...</span></p>
+            <p>Total Reports: <span id="reportCount">0</span></p>
+        </div>
+
+        <!-- Report Status Overview -->
+        <div class="section status-summary">
+            <h2>Report Status</h2>
+            <div class="stats">
+                <div class="stat">
+                    <p>Pending: <span id="pendingCount">0</span></p>
+                </div>
+                <div class="stat">
+                    <p>In Progress: <span id="inProgressCount">0</span></p>
+                </div>
+                <div class="stat">
+                    <p>Resolved: <span id="resolvedCount">0</span></p>
+                </div>
+            </div>
+            <button id="viewReportsBtn">View All Reports</button>
+        </div>
+
+        <!-- Rewards -->
+        <div class="section rewards">
+            <h2>Rewards</h2>
+            <p>Points: <span id="rewardPoints">0</span></p>
+            <p>Status: <span id="rewardStatus">Bronze</span></p>
+            <button id="redeemRewards">Redeem Points</button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="section">
+            <button id="raiseReportBtn">Raise a Report</button>
+            <button class="logout-btn" id="logoutButton">Logout</button>
+        </div>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>

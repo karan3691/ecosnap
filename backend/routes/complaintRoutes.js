@@ -1,65 +1,74 @@
 const express = require('express');
 const multer = require('multer');
 const Complaint = require('../models/complaint');
-const jwt = require('jsonwebtoken');
-const verifyToken = require('../middleware/verifyToken'); // Corrected import path for verifyToken
+const verifyToken = require('../middleware/verifyToken');
 
 const router = express.Router();
 
-// Configure Multer for image uploads
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Image will be saved in 'uploads/' folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`); // Save with unique filename
-    },
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
 });
+const upload = multer({ storage });
 
-const upload = multer({ storage: storage });
-
-// Post route to create a new complaint
+// routes/complaintRoutes.js
+// routes/complaintRoutes.js
 router.post('/', verifyToken, upload.single('image'), async (req, res) => {
-    console.log('Decoded user from token:', req.user); // Log the decoded user object
-
-    // Ensure that userId exists in req.user
-    if (!req.user || !req.user.userId) {
-        return res.status(400).json({ message: 'User ID not found in token' });
-    }
-
-    // Create a new complaint, passing the userId from the decoded token
-    const newComplaint = new Complaint({
-        user: req.user.userId, // Correctly use userId from decoded token
-        description: req.body.description,
-        imageUrl: req.file ? req.file.path : null,
-        location: {
-            lat: parseFloat(req.body.lat), // Ensure lat is a number
-            lng: parseFloat(req.body.lng), // Ensure lng is a number
-        },
-    });
-
     try {
+        const { description, lat, lng } = req.body;
+        console.log('Received complaint data:', { description, lat, lng, file: req.file });
+        if (!description || !lat || !lng) {
+            return res.status(400).json({ 
+                message: 'Missing required fields',
+                required: ['description', 'lat', 'lng']
+            });
+        }
+
+        const latNum = parseFloat(lat);
+        const lngNum = parseFloat(lng);
+        if (isNaN(latNum) || isNaN(lngNum)) {
+            return res.status(400).json({ message: 'Invalid coordinates format' });
+        }
+
+        const newComplaint = new Complaint({
+            user: req.user.userId,
+            description,
+            imageUrl: req.file?.path,
+            location: { lat: latNum, lng: lngNum }
+        });
+
         const savedComplaint = await newComplaint.save();
-        res.status(201).json(savedComplaint); // Respond with the saved complaint
+        console.log('Complaint saved:', savedComplaint);
+        res.status(201).json(savedComplaint);
     } catch (err) {
         console.error('Error saving complaint:', err);
         res.status(400).json({ message: err.message });
     }
 });
 
-// Get route to fetch all complaints
 router.get('/', async (req, res) => {
     try {
-        // Fetch all complaints from the database and populate the 'user' field with 'username'
-        const complaints = await Complaint.find().populate('user', 'username'); 
-        res.status(200).json(complaints); // Return complaints to the client
+        const complaints = await Complaint.find()
+            .populate('user', 'username')
+            .sort({ createdAt: -1 });
+        res.status(200).json(complaints);
     } catch (err) {
         console.error('Error fetching complaints:', err);
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
-
-
+router.get('/my-complaints', verifyToken, async (req, res) => {
+    try {
+        const complaints = await Complaint
+            .find({ user: req.user.userId })
+            .populate('user', 'username')
+            .sort({ createdAt: -1 });
+        res.status(200).json(complaints);
+    } catch (err) {
+        console.error('Error fetching user complaints:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 module.exports = router;
