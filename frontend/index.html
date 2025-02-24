@@ -171,8 +171,7 @@
             font-size: 0.95rem;
         }
 
-        #complaintForm textarea,
-        #complaintForm input[type="text"] {
+        #complaintForm textarea {
             padding: 1rem;
             border: 2px solid #e2e8f0;
             border-radius: var(--radius-md);
@@ -181,8 +180,7 @@
             background: var(--background-light);
         }
 
-        #complaintForm textarea:focus,
-        #complaintForm input[type="text"]:focus {
+        #complaintForm textarea:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.15);
@@ -227,6 +225,12 @@
             box-shadow: var(--shadow-lg);
         }
 
+        #locationStatus {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
         /* Complaints List */
         #complaintsSection {
             background: white;
@@ -259,16 +263,15 @@
             max-height: 70vh;
             overflow-y: auto;
             padding-right: 1rem;
-            display: grid;
-            gap: 1.5rem;
         }
 
         .complaint-item {
             background: var(--background-light);
             padding: 1.5rem;
             border-radius: var(--radius-md);
-            transition: var(--transition);
+            margin-bottom: 1rem;
             border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
         }
 
         .complaint-item:hover {
@@ -326,6 +329,34 @@
             transform: scale(1.02);
         }
 
+        /* Table Styles for My Reports */
+        .complaints-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .complaints-table th,
+        .complaints-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .complaints-table th {
+            background: var(--primary-light);
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .complaints-table td {
+            background: var(--background-light);
+        }
+
+        .complaints-table tr:hover td {
+            background: #f0f4f8;
+        }
+
         /* Loading and Error Styles */
         .loading {
             text-align: center;
@@ -380,6 +411,12 @@
             #complaintsList {
                 max-height: 60vh;
             }
+
+            .complaints-table th,
+            .complaints-table td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -407,22 +444,17 @@
                     <label for="description">Description:</label>
                     <textarea id="description" name="description" required placeholder="Describe the environmental issue..."></textarea>
                 </div>
-                
                 <div class="form-group">
-                    <label for="lat">Latitude:</label>
-                    <input type="text" id="lat" name="lat" required placeholder="Enter latitude...">
+                    <button type="button" id="getLocationBtn">Use My Location</button>
+                    <p id="locationStatus">Click to fetch your location</p>
+                    <!-- Hidden fields to store coordinates -->
+                    <input type="hidden" id="lat" name="lat">
+                    <input type="hidden" id="lng" name="lng">
                 </div>
-                
                 <div class="form-group">
-                    <label for="lng">Longitude:</label>
-                    <input type="text" id="lng" name="lng" required placeholder="Enter longitude...">
-                </div>
-                
-                <div class="form-group">
-                    <label for="image">Upload Image:</label>
+                    <label for="image">Upload Image (optional):</label>
                     <input type="file" id="image" name="image" accept="image/*">
                 </div>
-                
                 <button type="submit">Submit Complaint</button>
             </form>
         </section>

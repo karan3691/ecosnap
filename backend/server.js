@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const cron = require('node-cron'); // Added for scheduling
+const Complaint = require('./models/complaint'); // Import Complaint model
 const complaintRoutes = require('./routes/complaintRoutes');
 const authRoutes = require('./routes/authRoutes');
 
@@ -18,8 +20,8 @@ const port = process.env.PORT || 3000;
 
 // Configure CORS to allow multiple origins
 const allowedOrigins = [
-    'http://localhost:5500',   // For localhost
-    'http://127.0.0.1:5500'   // For 127.0.0.1
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
 ];
 
 app.use(cors({
@@ -50,6 +52,38 @@ mongoose.connect(process.env.MONGO_URI, {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
+
+// Cron job to update complaint statuses (runs every hour)
+cron.schedule('* * * * *', async () => {
+    console.log('Running complaint status update job...');
+    try {
+        const now = new Date();
+        const oneHourAgo = new Date(now - 60 * 1000); // 1 hour ago
+        const twoHoursAgo = new Date(now - 2 * 60 * 1000); // 2 hours ago
+
+        // Update "pending" to "in_progress" after 1 hour
+        const pendingUpdated = await Complaint.updateMany(
+            { 
+                status: 'pending', 
+                createdAt: { $lte: oneHourAgo } 
+            },
+            { $set: { status: 'in_progress' } }
+        );
+        console.log(`Updated ${pendingUpdated.modifiedCount} complaints from pending to in_progress`);
+
+        // Update "in_progress" to "resolved" after 2 hours
+        const inProgressUpdated = await Complaint.updateMany(
+            { 
+                status: 'in_progress', 
+                createdAt: { $lte: twoHoursAgo } 
+            },
+            { $set: { status: 'resolved' } }
+        );
+        console.log(`Updated ${inProgressUpdated.modifiedCount} complaints from in_progress to resolved`);
+    } catch (error) {
+        console.error('Error updating complaint statuses:', error);
+    }
+});
 
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);

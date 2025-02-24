@@ -111,10 +111,35 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     }
 });
 
+// Get User Location
+function getUserLocation(callback) {
+    const status = document.getElementById('locationStatus');
+    if (navigator.geolocation) {
+        status.textContent = 'Fetching your location...';
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                console.log('Location fetched:', { lat, lng });
+                status.textContent = `Location set: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                callback({ lat, lng });
+            },
+            (error) => {
+                console.error('Geolocation error:', error.message);
+                status.textContent = 'Failed to get location. Please allow location access or enter manually.';
+                callback(null);
+            }
+        );
+    } else {
+        status.textContent = 'Geolocation not supported by your browser.';
+        callback(null);
+    }
+}
+
 // Complaint Submission (index.html)
 document.getElementById('complaintForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    console.log('Complaint form submitted'); // Debug: Confirm event triggers
+    console.log('Complaint form submitted');
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -124,24 +149,33 @@ document.getElementById('complaintForm')?.addEventListener('submit', async (e) =
         return;
     }
 
-    const formData = new FormData();
     const description = document.getElementById('description').value;
     const lat = document.getElementById('lat').value;
     const lng = document.getElementById('lng').value;
     const image = document.getElementById('image').files[0];
+
+    if (!lat || !lng) {
+        alert('Please fetch your location before submitting.');
+        return;
+    }
+
+    const formData = new FormData();
     formData.append('description', description);
     formData.append('lat', lat);
     formData.append('lng', lng);
     if (image) formData.append('image', image);
 
-    console.log('Submitting complaint with data:', { description, lat, lng, image: image ? image.name : 'none' }); // Debug: Log form data
+    console.log('Submitting complaint with data:', { description, lat, lng, image: image ? image.name : 'none' });
 
     try {
         const result = await apiClient.post(COMPLAINT_API_URL, formData, true);
         alert('Complaint registered successfully!');
         console.log('Complaint submission result:', result);
         document.getElementById('complaintForm').reset();
-        loadComplaints(); // Refresh the list
+        document.getElementById('locationStatus').textContent = 'Click to fetch your location';
+        document.getElementById('lat').value = '';
+        document.getElementById('lng').value = '';
+        loadComplaints();
     } catch (error) {
         let errorMessage = 'Failed to submit complaint';
         try {
@@ -158,7 +192,7 @@ document.getElementById('complaintForm')?.addEventListener('submit', async (e) =
 async function loadComplaints() {
     const list = document.getElementById('complaintsList');
     if (!list) {
-        console.log('No complaintsList element found'); // Debug: Confirm element exists
+        console.log('No complaintsList element found');
         return;
     }
 
@@ -169,33 +203,76 @@ async function loadComplaints() {
         return;
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewMode = urlParams.get('view');
+    const endpoint = viewMode === 'my-reports' ? `${COMPLAINT_API_URL}/my-complaints` : COMPLAINT_API_URL;
+
     try {
         list.innerHTML = '<div class="loading">Loading complaints...</div>';
-        const complaints = await apiClient.get(COMPLAINT_API_URL);
+        const complaints = await apiClient.get(endpoint);
         list.innerHTML = '';
-        complaints.forEach(complaint => {
-            const div = document.createElement('div');
-            div.className = 'complaint-item';
-            div.innerHTML = `
-                <h3>${complaint.user?.username || 'Anonymous'}</h3>
-                <div class="complaint-meta">
-                    <span>📍 ${complaint.location.lat.toFixed(4)}, ${complaint.location.lng.toFixed(4)}</span>
-                    <span>🕒 ${new Date(complaint.createdAt).toLocaleString()}</span>
-                    <span>Status: ${complaint.status}</span>
-                </div>
-                <p>${complaint.description}</p>
-                ${complaint.imageUrl ? `<img src="${complaint.imageUrl}" alt="Complaint Image" loading="lazy">` : ''}
+        document.querySelector('#complaintsSection h2').textContent = viewMode === 'my-reports' ? 'My Recent Complaints' : 'Recent Complaints';
+
+        if (viewMode === 'my-reports') {
+            // Table view for user's reports
+            const table = document.createElement('table');
+            table.className = 'complaints-table';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
             `;
-            list.appendChild(div);
-        });
-        console.log('Complaints loaded:', complaints.length); // Debug: Log count
+            const tbody = table.querySelector('tbody');
+            complaints.forEach(complaint => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${complaint.description.substring(0, 30)}${complaint.description.length > 30 ? '...' : ''}</td>
+                    <td>${complaint.location.lat.toFixed(4)}, ${complaint.location.lng.toFixed(4)}</td>
+                    <td>${new Date(complaint.createdAt).toLocaleDateString()}</td>
+                    <td>${complaint.status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            list.appendChild(table);
+            if (complaints.length === 0) {
+                list.innerHTML = '<p>No complaints yet.</p>';
+            }
+        } else {
+            // List view for all reports
+            complaints.forEach(complaint => {
+                const div = document.createElement('div');
+                div.className = 'complaint-item';
+                div.innerHTML = `
+                    <h3>${complaint.user?.username || 'Anonymous'}</h3>
+                    <div class="complaint-meta">
+                        <span>📍 ${complaint.location.lat.toFixed(4)}, ${complaint.location.lng.toFixed(4)}</span>
+                        <span>🕒 ${new Date(complaint.createdAt).toLocaleString()}</span>
+                        <span>Status: ${complaint.status}</span>
+                    </div>
+                    <p>${complaint.description}</p>
+                    ${complaint.imageUrl ? `<img src="${complaint.imageUrl}" alt="Complaint Image" loading="lazy">` : ''}
+                `;
+                list.appendChild(div);
+            });
+            if (complaints.length === 0) {
+                list.innerHTML = '<p>No complaints yet.</p>';
+            }
+        }
+        console.log('Complaints loaded:', complaints.length);
     } catch (error) {
         list.innerHTML = '<div class="error">Failed to load complaints: ' + error.message + '</div>';
         console.error('Error loading complaints:', error);
     }
 };
 
-// Dashboard Functions
+// Load Dashboard Data (dashboard.html)
 async function loadDashboardData() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -207,7 +284,7 @@ async function loadDashboardData() {
         // User Profile
         const userData = await apiClient.get(`${API_URL}/user`);
         document.getElementById('userGreeting').textContent = `Welcome, ${userData.username}!`;
-        document.getElementById('joinDate').textContent = 'N/A'; // Update if createdAt is added
+        document.getElementById('joinDate').textContent = 'N/A';
         const userComplaints = await apiClient.get(`${COMPLAINT_API_URL}/my-complaints`);
         console.log('User complaints:', userComplaints);
         document.getElementById('reportCount').textContent = userComplaints.length;
@@ -220,15 +297,36 @@ async function loadDashboardData() {
         document.getElementById('inProgressCount').textContent = inProgress;
         document.getElementById('resolvedCount').textContent = resolved;
 
+        // Recent Complaints (latest 5)
+        const recentList = document.getElementById('recentComplaints');
+        recentList.innerHTML = '';
+        userComplaints.slice(0, 5).forEach(complaint => {
+            const div = document.createElement('div');
+            div.className = 'complaint-item';
+            div.innerHTML = `
+                <h3>${complaint.description.substring(0, 20)}...</h3>
+                <div class="complaint-meta">
+                    <span>📍 ${complaint.location.lat.toFixed(4)}, ${complaint.location.lng.toFixed(4)}</span>
+                    <span>🕒 ${new Date(complaint.createdAt).toLocaleString()}</span>
+                    <span>Status: ${complaint.status}</span>
+                </div>
+                ${complaint.imageUrl ? `<img src="${complaint.imageUrl}" alt="Complaint Image" loading="lazy" style="max-width: 100px;">` : ''}
+            `;
+            recentList.appendChild(div);
+        });
+        if (userComplaints.length === 0) {
+            recentList.innerHTML = '<p>No recent complaints yet.</p>';
+        }
+
         // Rewards
         const points = userComplaints.length * 10;
         document.getElementById('rewardPoints').textContent = points;
-        document.getElementById('rewardStatus').textContent = points > 100 ? 'Platinum' : points > 50 ? 'Gold' : points > 20 ? 'Silver' : 'Bronze';
+        document.getElementById('rewardStatus').textContent = points > 50 ? 'Gold' : points > 20 ? 'Silver' : 'Bronze';
     } catch (error) {
         console.error('Error loading dashboard data:', error);
         logout();
     }
-}
+};
 
 // Navigation and Initialization
 document.addEventListener("DOMContentLoaded", () => {
@@ -248,12 +346,21 @@ document.addEventListener("DOMContentLoaded", () => {
         loadComplaints();
     }
 
+    document.getElementById('getLocationBtn')?.addEventListener('click', () => {
+        getUserLocation((coords) => {
+            if (coords) {
+                document.getElementById('lat').value = coords.lat;
+                document.getElementById('lng').value = coords.lng;
+            }
+        });
+    });
+
     document.getElementById('raiseReportBtn')?.addEventListener('click', () => {
         window.location.assign('index.html');
     });
 
     document.getElementById('viewReportsBtn')?.addEventListener('click', () => {
-        window.location.assign('index.html');
+        window.location.assign('index.html?view=my-reports');
     });
 
     document.getElementById('redeemRewards')?.addEventListener('click', () => {
